@@ -64,3 +64,13 @@ def create_user(user: User):
     users_db.append(user)
     print(users_db)
     return {"message" : f"Utilisateur {user.name} créé avec succès", "user": user}
+
+# mise à jour d'un utilisateur
+@app.put("/users/{user_id}", description='Mise à jour d\'un utilisateur')
+def update_user(user_id: int, user: User):
+    for index, existing_user in enumerate(users_db):
+        if existing_user.id == user_id:
+            users_db[index] = user
+            return{"message": f"Utilisateur {user.name} mise à jour avec succès"}
+    print(users_db)
+    raise HTTPException(status_code=404, detail= f'Utilisateur avec l\'id ({user.id}) n\'existe pas')
