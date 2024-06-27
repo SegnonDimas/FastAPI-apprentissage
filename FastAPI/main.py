@@ -1,5 +1,5 @@
-from typing import Union
-from fastapi import FastAPI
+from typing import Union, List
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel  # Importation de Pydantic pour créer des modèles de données
 
 
@@ -11,6 +11,9 @@ class User(BaseModel):
     id: int
     name: str
     age: Union[int, None] = None
+
+# liste pour stocker les utilisateurs
+users_db: List[User] = []
 
 @app.get("/", description='Our main root')
 def read_root():
@@ -31,10 +34,13 @@ def current_user():
 def users_info(id):
     return {"user id" : id}"""
 
-
+# obtenir un utilisateur donné par son ID
 @app.get("/users/{user_id}", description='Get user by ID')
 def get_user(user_id: int):
-    return {"user_id": user_id, "message": "Here is the user you requested"}
+    for user in users_db:
+        if(user.id == user_id):
+            return {"user_id": user_id, "message": "Voici l'utilisateur que vous avez demandé", "user" :user}
+    raise HTTPException(status_code=404, detail= "Utilisateur non trouvé")
 
 
 fake_items_db = [{"item_name" : "Foo"}, {"item_name" : "Bar"}, {"item_name" : "Baz"}]
@@ -47,9 +53,14 @@ def list_items(skip : int = 0 , limit : int = 10):
 def user_name (name):
     return {"user name : " :  name}
 
+
 # création d'un utilisateur
 @app.post("/users/", description='Création d\'un nouvel utilisateur')
 def create_user(user: User):
+    #Vérifier si un utilisateur existait déjà avec ce même id
+    for existing_user in users_db:
+        if existing_user.id == user.id:
+            raise HTTPException(status_code=404, detail= f'Utilisateur avec cet id ({user.id}) existe déjà')
+    users_db.append(user)
+    print(users_db)
     return {"message" : f"Utilisateur {user.name} créé avec succès", "user": user}
-
-
