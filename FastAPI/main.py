@@ -74,3 +74,13 @@ def update_user(user_id: int, user: User):
             return{"message": f"Utilisateur {user.name} mise à jour avec succès"}
     print(users_db)
     raise HTTPException(status_code=404, detail= f'Utilisateur avec l\'id ({user.id}) n\'existe pas')
+
+# suppression d'un utilisateur
+@app.delete("/users/{user_id}", description='Suppression d\'un utilisateur')
+def delete_user(user_id: int):
+    for index, existing_user in enumerate(users_db):
+        if(existing_user.id == user_id):
+            users_db.pop(index)
+            return{"message" : f"Utilisateur avec l'ide {user_id} supprimé avec succès"}
+    print(users_db)
+    raise HTTPException(status_code=404, detail=f'Utilisateur non trouvé')
